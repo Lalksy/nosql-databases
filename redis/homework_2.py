@@ -31,4 +31,3 @@ article_switch_vote(redis, "user:2", "article:8", "article:1")
 # HOMEWORK 2 Part II
 # article = redis.?
 # print redis.?
-
