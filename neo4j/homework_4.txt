@@ -1,7 +1,176 @@
-// The scenario you have used for your schema is:
-
+// The scenario you have used for your schema is: Game of Thrones. 
 
 // This is an example. Your own commands should *not* be commented out so we can pipe the file into the cypher-shell.
 // If you'd like to test your commands, you can run 'cat homework_4.txt | cypher-shell -u neo4j -p test' from
 // the vagrant box command line. Make sure neo4j is running first.
 // CREATE (a:person { name: 't' });
+
+CREATE(n:House {name: 'Targaryen'});
+CREATE(n:House {name: 'Stark'});
+
+CREATE(n:Person { name: 'Eddard' });
+CREATE(n:Person { name: 'Catelyn' });
+CREATE(n:Person { name: 'Rob' });
+CREATE(n:Person { name: 'Sansa' });
+CREATE(n:Person { name: 'Arya' });
+CREATE(n:Person { name: 'Bran' });
+CREATE(n:Person { name: 'Rickon' });
+
+CREATE(n:Person { name: 'Daenerys' });
+CREATE(n:Person { name: 'Viserys' });
+CREATE(n:Person { name: 'Khal Drogo' });
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Eddard' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Catelyn' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'marriage'}]->(h);
+
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Rob' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Sansa' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Arya' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Bran' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Rickon' AND h.name = 'Stark'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Khal Drogo' AND h.name = 'Targaryen'
+CREATE (a)-[r:Member {by: 'marriage'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Daenerys' AND h.name = 'Targaryen'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+MATCH (a:Person),(h:House)
+WHERE a.name = 'Viserys' AND h.name = 'Targaryen'
+CREATE (a)-[r:Member {by: 'blood'}]->(h);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Eddard'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Sansa' AND b.name = 'Eddard'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Arya' AND b.name = 'Eddard'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Bran' AND b.name = 'Eddard'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rickon' AND b.name = 'Eddard'
+CREATE (a)-[r:child_of]->(b);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Catelyn'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Sansa' AND b.name = 'Catelyn'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Arya' AND b.name = 'Catelyn'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Bran' AND b.name = 'Catelyn'
+CREATE (a)-[r:child_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rickon' AND b.name = 'Catelyn'
+CREATE (a)-[r:child_of]->(b);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Daenerys' AND b.name = 'Viserys'
+CREATE (a)-[r:sibling_of]->(b);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Sansa'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Arya'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Bran'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Rob' AND b.name = 'Rickon'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Sansa' AND b.name = 'Arya'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Sansa' AND b.name = 'Bran'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Sansa' AND b.name = 'Rickon'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Arya' AND b.name = 'Bran'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Arya' AND b.name = 'Rickon'
+CREATE (a)-[r:sibling_of]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Bran' AND b.name = 'Rickon'
+CREATE (a)-[r:sibling_of]->(b);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Catelyn' AND b.name = 'Eddard'
+CREATE (a)-[r:married]->(b);
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Daenerys' AND b.name = 'Khal Drogo'
+CREATE (a)-[r:married]->(b);
+
+
+MATCH (a:Person),(b:Person)
+WHERE a.name = 'Khal Drogo' AND b.name = 'Viserys'
+CREATE (a)-[r:killed]->(b);
+
+
+
+
+// Find the married couples
+MATCH (a:Person)-[r:married]->(b:Person)
+RETURN a.name, type(r), b.name;
+
+// Find our murderer
+MATCH (a:Person)-[r:killed]->(b:Person)
+RETURN a.name, type(r), b.name;
+
