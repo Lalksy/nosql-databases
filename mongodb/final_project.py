@@ -11,12 +11,14 @@
 #   specifies how many instances the write should go to, and 'j' indicates a request for acknowledgement that
 #   the write operation has been written to the journal.
 
+# Imports
 import pymongo
 from pymongo import MongoClient, GEO2D, ReturnDocument
 from bson.son import SON
 from pytz import timezone
 from datetime import datetime, timedelta
 
+# get some preset times
 east = timezone('US/Eastern')
 monthly_pass_purchase_date = datetime(2018, 4, 30, 6, 0, 0)
 monthly_pass_expire_date = datetime(2018, 5, 30, 6, 0, 0)
@@ -30,10 +32,12 @@ x_expire_date = datetime(2018, 4, 1, 6, 0, 0)
 
 return_deadline = datetime(2018, 5, 4, 1, 8, 0)
 
+# to keep track of unique ids. I want to use simple integers for readability.
 next_userid = 1
 next_rackid = 1
 next_bikeid = 1
 
+# Set up database and connection
 client = MongoClient()
 database = client.bikeshare
 
@@ -43,6 +47,7 @@ bikes = database.bikes
 
 racks.create_index( [ ( "location", GEO2D ) ] )
 
+# insert users
 result = users.insert_many([
     {
       "name": { "first": "Lalka", "last": "Rieger" },
@@ -68,6 +73,7 @@ result = users.insert_many([
     }
 ])
 
+# check users are inserted. Can do more complex handling of ids if we want to use confirmations/write conern.
 if(len(result.inserted_ids) != 3) :
     print("Failed to insert users.")
     next_userid += len(result.inserted_ids)
@@ -75,7 +81,7 @@ else :
     print("Inserted 3 users.")
     next_userid += 3
 
-
+# insert racks
 result = racks.insert_many([
     {
         "id": 1,
@@ -115,6 +121,7 @@ result = racks.insert_many([
     }
 ])
 
+# check racks are inserted
 if(len(result.inserted_ids) != 5) :
     print("Failed to insert racks.")
     next_rackid += len(result.inserted_ids)
@@ -123,6 +130,7 @@ else :
     next_rackid += 5
 
 
+# insert bikes
 result = bikes.insert_many([
     {
         "id": 1,
@@ -166,6 +174,7 @@ result = bikes.insert_many([
     }
 ])
 
+# check insert worked
 if(len(result.inserted_ids) != 10) :
     print("Failed to insert bikes.")
     next_bikeid += len(result.inserted_ids)
@@ -209,8 +218,9 @@ newusr = users.find_one(
 print('Added payment info to {} {}, cardnumber={}'.format(newusr['name']['first'], newusr['name']['last'], newusr['billing']['primary']))
 
 # Action 3: User purchases a pass
-purchse_time = east.localize(datetime.utcnow())
-expire_time = east.localize(datetime.utcnow()+ timedelta(hours=24))
+# Leaving everything in UTC time for now. We can also store timezones and do the conversion if we want.
+purchse_time = datetime.utcnow()
+expire_time = datetime.utcnow()+ timedelta(hours=24)
 users.find_one_and_update(
     { "id": jacobid }, { '$push': { "history" : { "account": newusr['billing']['primary'], "purchase": "day pass", "date": purchse_time, "amount": 30.00 } },
                         '$set': { "pass" : { "type": "day", "purchase": purchse_time, "expire": expire_time } } }
@@ -228,6 +238,7 @@ print('{}\'s pass expires {}'.format(active['name']['first'], active['pass']['ex
 # Action 4: User looks up bike within 1 mile
 
 closeracks = database.command(SON([('geoNear', 'racks'), ('near', [ 40.804761, -73.966283 ]), ('maxDistance', 0.01)]))
+# get racks that are close, show which are empty and which have bikes
 for doc in closeracks['results']:
     available_bikes = []
     for slot in doc['obj']['slots']:
@@ -235,6 +246,8 @@ for doc in closeracks['results']:
             available_bikes.append(slot['bike'])
     if(len(available_bikes) > 0):
         print('{} bikes avaiable {}'.format(len(available_bikes), doc['obj']['name']))
+    else :
+        print('{} empty'.format(doc['obj']['name']))
 
 # Action 5: Takes out a bike
 return_time = datetime.utcnow()+timedelta(hours=2)
@@ -243,10 +256,9 @@ removed = bikes.find_one_and_update(
    { "$set": { "status": { "status": "rented", "location": jacobid, "expire": return_time } } }
 )
 
-
 remove = racks.find_one_and_update(
    { "id" : removed['status']['location']['rack'], "slots.id": removed['status']['location']['slot'] },
-   { "$set": { 'slots.$.bike': { 'bike': None } } }
+   { "$set": { 'slots.$.bike': None } }
 )
 
 print('bike {} rented from {} slot {}'.format(removed['id'], remove['name'], removed['status']['location']['slot']))
@@ -261,6 +273,7 @@ print('rental expires {}'.format(rental['status']['expire']))
 
 # Action 7: looks up racks with an empty slot within 2 miles
 closeracks = database.command(SON([('geoNear', 'racks'), ('near', [ 40.708004, -73.999089 ]), ('maxDistance', 0.02)]))
+# get racks that are close, show which are full and which have open slots
 for doc in closeracks['results']:
     available_slots = []
     for slot in doc['obj']['slots']:
@@ -268,11 +281,13 @@ for doc in closeracks['results']:
             available_slots.append(slot['id'])
     if(len(available_slots) > 0):
         print('{} slots avaiable {}'.format(len(available_slots), doc['obj']['name']))
+    else:
+        print('{} full'.format(doc['obj']['name']))
 
 # Action 8: returns bike
 return_rack = racks.find_one_and_update(
    { "id" : 5, "slots.bike": None },
-   { "$set": { 'slots.$.bike': { 'bike': removed['id'] } } },
+   { "$set": { 'slots.$.bike': removed['id'] } },
    return_document=ReturnDocument.AFTER
   )
 
